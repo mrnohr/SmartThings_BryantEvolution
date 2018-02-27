@@ -29,7 +29,7 @@ definition(
 
 preferences {
     page(name: "prefLogIn", title: "Bryant MyEvolution / Carrier MyInfinity")
-    //page(name: "prefListDevice", title: "Bryant MyEvolution / Carrier MyInfinity")
+    page(name: "prefListDevice", title: "Bryant MyEvolution / Carrier MyInfinity")
 }
 
 /* Preferences */
@@ -219,15 +219,17 @@ private getThermostatList() {
                         thermostatList[dni] = systemName.toString() + ": " + zone.name.text().toString()
 
                         //Get the state of each device
-                        state.data[dni] = [
-                            temperature: zone.rt.toInteger(),
-                            humidity: zone.rh.toInteger(),
-                            coolingSetpoint: zone.clsp.toInteger(),
-                            heatingSetpoint: zone.htsp.toInteger(),
-                            thermostatFanMode: lookupInfo( "thermostatFanMode", zone.fan.text().toString(), true ),
-                            thermostatOperatingState: lookupInfo( "thermostatOperatingState", response.data.mode.text().toString(), true ),
-                            thermostatActivityState: zone.currentActivity.text().toString(),
-                        ]
+                        if(state?.data) {
+                            state.data[dni] = [
+                                temperature: zone.rt.toInteger(),
+                                humidity: zone.rh.toInteger(),
+                                coolingSetpoint: zone.clsp.toInteger(),
+                                heatingSetpoint: zone.htsp.toInteger(),
+                                thermostatFanMode: lookupInfo( "thermostatFanMode", zone.fan.text().toString(), true ),
+                                thermostatOperatingState: lookupInfo( "thermostatOperatingState", response.data.mode.text().toString(), true ),
+                                thermostatActivityState: zone.currentActivity.text().toString(),
+                            ]
+                        }
                     }
                 }
             }
@@ -245,7 +247,9 @@ private getThermostatList() {
                         state.lookup.heatingSetPointLow.putAt(dni, (response.data.config.utilityEvent.minLimit.toInteger() + response.data.config.cfgdead.toInteger()))
                         state.lookup.differenceSetPoint.putAt(dni, response.data.config.cfgdead.toInteger())
                         zone.activities.activity.each { activity -> state.lookup.activity[dni].putAt(activity.'@id'.toString(), "Activity :\n" + activity.'@id'.toString()) }
-                        state.data[dni] = state.data[dni] + [ thermostatMode: lookupInfo( "thermostatMode", response.data.config.mode.text().toString(), true ) ]
+                        if(state?.data) {
+                            state.data[dni] = state.data[dni] + [ thermostatMode: lookupInfo( "thermostatMode", response.data.config.mode.text().toString(), true ) ]
+                        }
                     }
                 }
             }
